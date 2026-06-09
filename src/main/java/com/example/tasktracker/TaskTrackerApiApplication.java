@@ -1,5 +1,6 @@
 package com.example.tasktracker;
 
+import com.example.tasktracker.model.User;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
