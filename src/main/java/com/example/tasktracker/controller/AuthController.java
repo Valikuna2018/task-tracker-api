@@ -1,5 +1,7 @@
 package com.example.tasktracker.controller;
 
+import com.example.tasktracker.dto.auth.AuthResponse;
+import com.example.tasktracker.dto.auth.LoginRequest;
 import com.example.tasktracker.dto.auth.RegisterRequest;
 import com.example.tasktracker.dto.user.UserResponse;
 import com.example.tasktracker.service.AuthService;
@@ -21,4 +23,10 @@ public class AuthController {
     public UserResponse register(@Valid @RequestBody RegisterRequest request){
         return authService.register(request);
     }
+
+    @PostMapping("/login")
+    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(request);
+    }
+
 }
