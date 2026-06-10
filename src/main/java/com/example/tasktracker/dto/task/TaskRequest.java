@@ -5,13 +5,15 @@ import com.example.tasktracker.enums.Priority;
 import com.example.tasktracker.enums.TaskStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TaskRequest {
 
     @NotBlank

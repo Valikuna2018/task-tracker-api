@@ -2,15 +2,15 @@ package com.example.tasktracker.dto.task;
 
 import com.example.tasktracker.enums.Priority;
 import com.example.tasktracker.enums.TaskStatus;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class TaskResponse {
 
