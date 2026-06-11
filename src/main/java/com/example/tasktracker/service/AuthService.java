@@ -4,6 +4,7 @@ import com.example.tasktracker.dto.auth.AuthResponse;
 import com.example.tasktracker.dto.auth.LoginRequest;
 import com.example.tasktracker.dto.auth.RegisterRequest;
 import com.example.tasktracker.dto.user.UserResponse;
+import com.example.tasktracker.exception.BadRequestException;
 import com.example.tasktracker.mapper.UserMapper;
 import com.example.tasktracker.model.User;
 import com.example.tasktracker.repository.UserRepository;
@@ -23,7 +24,7 @@ public class AuthService {
 
     public UserResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email is already registered");
+            throw new BadRequestException("Email is already registered");
         }
 
         User user = userMapper.toEntity(request);
@@ -39,7 +40,7 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            throw new BadRequestException("Invalid email or password");
         }
 
         String token = jwtService.generateToken(user);

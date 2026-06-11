@@ -1,6 +1,8 @@
 package com.example.tasktracker.service;
 
 import com.example.tasktracker.dto.task.UpdateTaskStatusRequest;
+import com.example.tasktracker.exception.BadRequestException;
+import com.example.tasktracker.exception.ResourceNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.example.tasktracker.enums.Priority;
@@ -34,10 +36,10 @@ public class TaskService {
 
     public TaskResponse createTask(TaskRequest request) {
         Project project = projectRepository.findById(request.getProjectId())
-                .orElseThrow(() -> new RuntimeException("project not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("project not found"));
 
         User user = userRepository.findById(request.getAssignedUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Task task = taskMapper.toEntity(request);
         task.setAssignedUser(user);
@@ -50,7 +52,7 @@ public class TaskService {
 
     public TaskResponse updateTaskStatus(Long taskId, UpdateTaskStatusRequest request) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
@@ -58,7 +60,7 @@ public class TaskService {
         String currentUserEmail = authentication.getName();
 
         if (!task.getAssignedUser().getEmail().equals(currentUserEmail)) {
-            throw new RuntimeException("You can update only your assigned tasks");
+            throw new BadRequestException("You can update only your assigned tasks");
         }
 
         task.setStatus(request.getStatus());
@@ -70,7 +72,7 @@ public class TaskService {
 
     public TaskResponse getTaskById(Long id) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
         return taskMapper.toResponse(task);
     }
@@ -93,13 +95,13 @@ public class TaskService {
 
     public TaskResponse updateTask(Long id, TaskRequest request) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("task not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("task not found"));
 
         Project project = projectRepository.findById(request.getProjectId())
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
         User assignedUser = userRepository.findById(request.getAssignedUserId())
-                .orElseThrow(() -> new RuntimeException("assigneduser not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("assigneduser not found"));
 
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
@@ -115,7 +117,7 @@ public class TaskService {
 
     public void deleteTask(Long id) {
         if (!taskRepository.existsById(id)) {
-            throw new RuntimeException("Task not found");
+            throw new ResourceNotFoundException("Task not found");
         }
 
         taskRepository.deleteById(id);
@@ -123,7 +125,7 @@ public class TaskService {
 
     public Page<TaskResponse> getTasksByProject(Long projectId, int page, int size) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
         return taskRepository.findByProject(project, PageRequest.of(page, size))
                 .map(p -> taskMapper.toResponse(p));
@@ -131,7 +133,7 @@ public class TaskService {
 
     public Page<TaskResponse> getTasksByAssignedUser(Long userId, int page, int size) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return taskRepository.findByAssignedUser(user, PageRequest.of(page, size))
                 .map(p -> taskMapper.toResponse(p));
