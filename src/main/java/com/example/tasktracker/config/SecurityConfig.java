@@ -36,6 +36,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/api/projects/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers("/api/tasks/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
