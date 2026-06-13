@@ -2,6 +2,7 @@ package com.example.tasktracker.service;
 
 import com.example.tasktracker.dto.project.ProjectRequest;
 import com.example.tasktracker.dto.project.ProjectResponse;
+import com.example.tasktracker.exception.BadRequestException;
 import com.example.tasktracker.exception.ResourceNotFoundException;
 import com.example.tasktracker.mapper.ProjectMapper;
 import com.example.tasktracker.model.Project;
@@ -9,7 +10,6 @@ import com.example.tasktracker.model.User;
 import com.example.tasktracker.repository.ProjectRepository;
 import com.example.tasktracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -24,25 +24,29 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
 
     public ProjectResponse createProject(ProjectRequest request) {
+        User currentUser = getCurrentUser();
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Project not found"));
         Project project = projectMapper.toEntity(request);
+        project.setOwner(currentUser);
 
-        project.setOwner(user);
-        Project saveProject = projectRepository.save(project);
+        Project savedProject = projectRepository.save(project);
 
-        return projectMapper.toResponse(saveProject);
+        return projectMapper.toResponse(savedProject);
     }
 
     public List<ProjectResponse> getAllProjects() {
+        User currentUser = getCurrentUser();
+
+        if (isManager(currentUser)) {
+            return projectRepository.findByOwner(currentUser)
+                    .stream()
+                    .map(projectMapper::toResponse)
+                    .toList();
+        }
+
         return projectRepository.findAll()
                 .stream()
-                .map(p -> projectMapper.toResponse(p))
+                .map(projectMapper::toResponse)
                 .toList();
     }
 
@@ -50,12 +54,18 @@ public class ProjectService {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
+        User currentUser = getCurrentUser();
+        checkProjectAccess(project, currentUser);
+
         return projectMapper.toResponse(project);
     }
 
     public ProjectResponse updateProject(Long id, ProjectRequest request) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        User currentUser = getCurrentUser();
+        checkProjectAccess(project, currentUser);
 
         project.setName(request.getName());
         project.setDescription(request.getDescription());
@@ -66,10 +76,39 @@ public class ProjectService {
     }
 
     public void deleteProject(Long id) {
-        if (!projectRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Project not found");
-        }
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
-        projectRepository.deleteById(id);
+        User currentUser = getCurrentUser();
+        checkProjectAccess(project, currentUser);
+
+        projectRepository.delete(project);
+    }
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    private boolean isAdmin(User user) {
+        return user.getRole().name().equals("ADMIN");
+    }
+
+    private boolean isManager(User user) {
+        return user.getRole().name().equals("MANAGER");
+    }
+
+    private boolean isProjectOwner(Project project, User user) {
+        return project.getOwner().getId().equals(user.getId());
+    }
+
+    private void checkProjectAccess(Project project, User currentUser) {
+        if (!isAdmin(currentUser) && !isProjectOwner(project, currentUser)) {
+            throw new BadRequestException("You do not have access to this project");
+        }
     }
 }

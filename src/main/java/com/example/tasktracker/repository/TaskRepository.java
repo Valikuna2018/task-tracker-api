@@ -20,4 +20,24 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Page<Task> findByPriority(Priority priority, Pageable pageable);
 
     Page<Task> findByStatusAndPriority(TaskStatus status, Priority priority, Pageable pageable);
+
+    Page<Task> findByProjectOwner(User owner, Pageable pageable);
+
+    Page<Task> findByAssignedUserAndStatus(User assignedUser, TaskStatus status, Pageable pageable);
+
+    Page<Task> findByAssignedUserAndPriority(User assignedUser, Priority priority, Pageable pageable);
+
+    Page<Task> findByAssignedUserAndStatusAndPriority(User assignedUser, TaskStatus status, Priority priority, Pageable pageable
+    );
+
+    Page<Task> findByProjectOwnerAndStatus(User owner, TaskStatus status, Pageable pageable);
+
+    Page<Task> findByProjectOwnerAndPriority(User owner, Priority priority, Pageable pageable);
+
+    Page<Task> findByProjectOwnerAndStatusAndPriority(
+            User owner,
+            TaskStatus status,
+            Priority priority,
+            Pageable pageable
+    );
 }
