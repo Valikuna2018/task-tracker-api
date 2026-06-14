@@ -90,6 +90,7 @@ class TaskServiceTest {
                 .assignedUserEmail("user@test.com")
                 .build();
 
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(assignedUser));
         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(taskRepository.save(task)).thenReturn(task);
         when(taskMapper.toResponse(task)).thenReturn(response);
@@ -109,6 +110,12 @@ class TaskServiceTest {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        User currentUser = User.builder()
+                .id(2L)
+                .email("other@test.com")
+                .role(Role.USER)
+                .build();
+
         User assignedUser = User.builder()
                 .id(1L)
                 .email("user@test.com")
@@ -125,6 +132,7 @@ class TaskServiceTest {
         UpdateTaskStatusRequest request = new UpdateTaskStatusRequest();
         request.setStatus(TaskStatus.DONE);
 
+        when(userRepository.findByEmail("other@test.com")).thenReturn(Optional.of(currentUser));
         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
 
         assertThrows(BadRequestException.class,

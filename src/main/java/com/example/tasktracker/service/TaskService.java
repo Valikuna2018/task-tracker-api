@@ -138,6 +138,15 @@ public class TaskService {
         User assignedUser = userRepository.findById(request.getAssignedUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Assigned user not found"));
 
+
+        if (!project.getOwner().getId().equals(getCurrentUser().getId()) && getCurrentUser().getRole().name().equals("USER")) {
+            throw new BadRequestException("User can't change task's project ID");
+        }
+
+        if (!project.getOwner().getId().equals(getCurrentUser().getId()) && getCurrentUser().getRole().name().equals("MANAGER")) {
+            throw new BadRequestException("Project Owner manager can't move task to someone else's project");
+        }
+
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setDueDate(request.getDueDate());
