@@ -4,7 +4,7 @@
 
 Task Tracker API is a RESTful Spring Boot application that allows users to manage projects and tasks in a collaborative environment. The application implements Role-Based Access Control (RBAC) using JWT authentication.
 
-The project was developed as an HR assignment to demonstrate clean architecture, Spring Boot best practices, authentication and authorization, DTO mapping, validation, exception handling, and unit testing.
+The project was developed to demonstrate clean architecture, Spring Boot, authentication and authorization, DTO mapping, validation, exception handling, and unit testing.
 
 ---
 
@@ -41,7 +41,7 @@ Configure your PostgreSQL database credentials in:
 Example:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/task_tracker
+spring.datasource.url=jdbc:postgresql://localhost:5432/your_db
 spring.datasource.username=your_username
 spring.datasource.password=your_password
 ```
@@ -71,7 +71,7 @@ Or run the main application class directly from your IDE.
 The application starts on:
 
 ```text
-http://localhost:8080
+http://localhost:8081
 ```
 
 ---
@@ -203,7 +203,7 @@ GET /api/tasks?status=IN_PROGRESS&priority=MEDIUM
 Swagger UI is available at:
 
 ```text
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8081/swagger-ui/index.html
 ```
 
 Swagger can be used to test all endpoints directly from the browser.
